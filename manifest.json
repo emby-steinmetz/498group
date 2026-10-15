@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "Selection Collector",
+  "version": "0.1.0",
+  "description": "Shows an empty translation box and saves highlighted text.",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "View saved phrases"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
