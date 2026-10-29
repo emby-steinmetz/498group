@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "Selection Collector",
+  "name": "Wordbank",
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwrRcf5DZh3pFF1VUg7jVWY4qpBnFgexDZMM5kF/QLmIrzmQ58Y9gPoqn4jHrQ/soDB+iKilPNAKu0gDytSax25Gc/MRjX9CMBt/hrdxj3cgEzhFKj2FMn2sDqQjBKcpUie5ENkaFob6wJQmRF7HTehqQNCM+aeVl9DXTWCZNdZtxH6QREXBKZhewmEnG8a7FCj2vabCH65VGVa/UwF1GImfWlCwVgGXQdqn/FRgY8zI0ITyOQxvl53wlZNQaof4DRL4bCk5Xux6/lRNfLUZv7EgSRnldvxQozalYgX5pKWXKSI+d9yCWTc/4aajrhP/xlZ/JF9Qv7JE2zKp6rcrTZQIDAQAB",
   "version": "0.1.0",
   "description": "Shows an empty translation box and saves highlighted text.",
-  "permissions": ["storage"],
+  "permissions": ["storage", "identity"],
   "action": {
     "default_title": "View saved phrases"
   },
@@ -15,5 +16,16 @@
       "matches": ["http://*/*", "https://*/*"],
       "js": ["content.js"]
     }
+  ],
+  "host_permissions": [
+  "http://100.87.150.51/*",
+  "https://www.googleapis.com/*"
+  ],
+  "oauth2": {
+  "client_id": "259897327569-ref8gbopv2d111uj90q8b5qi00sp7i4a.apps.googleusercontent.com",
+  "scopes": [
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile"
   ]
+  }
 }
