@@ -20,7 +20,7 @@ async function saveSelection() {
   // Don't save the same selection again when multiple events fire.
   if (text === previousSelection) return;
   previousSelection = text;
-
+  
   const rectangle = selection.getRangeAt(0).getBoundingClientRect();
   closeBox();
 
@@ -69,8 +69,34 @@ async function saveSelection() {
         savedAt: new Date().toISOString()
       }
     });
-  } catch (error) {
+    } catch (error) {
     console.error("Could not save selected text:", error);
+  }
+
+}
+
+async function saveToWordbank(selectedText) {
+  console.log("Wordbank function called:", selectedText);
+  
+  const text = selectedText.trim();
+
+  if (!text) return;
+
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: 'WORDBANK_SAVE_TOKEN',
+      text: text,
+      source_language: 'en',
+      source_url: window.location.href
+    });
+
+    if (response?.success) {
+      console.log('Saved to Wordbank!', response.data);
+    } else {
+      console.error('Wordbank error:', response?.error);
+    }
+  } catch (error) {
+    console.error('Could not contact Wordbank:', error);
   }
 }
 
