@@ -1,12 +1,222 @@
+
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Saved phrases</title>
-  </head>
-  <body>
-    <h1>Saved phrases</h1>
-    <ul id="phrases"></ul>
-    <script src="saved.js"></script>
-  </body>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Vocabulary | Wordbank</title>
+  <link rel="stylesheet" href="saved.css">
+
+  <style>
+    /* Additional controls use colors from saved.css. */
+    .wordbank-panel {
+      margin-bottom: 24px;
+      padding: 20px 22px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .wordbank-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wordbank-actions button {
+      min-height: 42px;
+      padding: 9px 16px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--bg);
+      color: var(--ink);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .wordbank-actions button:hover {
+      border-color: var(--accent);
+    }
+
+    .wordbank-actions button:focus-visible {
+      outline: 3px solid #efc85b;
+      outline-offset: 2px;
+    }
+
+    .wordbank-actions button:disabled {
+      opacity: .6;
+      cursor: wait;
+    }
+
+    .wordbank-actions button[hidden] {
+      display: none;
+    }
+
+    #google-login,
+    #save-logout {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    :root[data-theme="dark"] #google-login,
+    :root[data-theme="dark"] #save-logout {
+      color: #18172a;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root[data-theme="system"] #google-login,
+      :root[data-theme="system"] #save-logout {
+        color: #18172a;
+      }
+    }
+
+    .wordbank-panel [role="status"] {
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .wordbank-panel [role="status"]:empty {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+
+    <!-- Vocabulary header -->
+    <header class="header">
+      <div class="brand">
+        <span class="logo" aria-hidden="true">✦</span>
+
+        <div>
+          <p class="eyebrow">WORDBANK</p>
+          <h1>My Vocabulary</h1>
+          <p class="subtitle">
+            Your saved words and phrases, all in one place.
+          </p>
+        </div>
+      </div>
+
+      <span class="count" id="count">0 saved</span>
+    </header>
+
+    <!-- Account, import, and export controls -->
+    <section class="wordbank-panel"
+             aria-label="Wordbank account and file controls">
+
+      <div class="wordbank-actions">
+        <button id="google-login" type="button">
+          Sign in with Google
+        </button>
+
+        <button id="save-logout" type="button" hidden>
+          Save &amp; Log Out
+        </button>
+
+        <button id="import-button" type="button">
+          Import Wordbank
+        </button>
+
+        <button id="export-button" type="button">
+          Export Wordbank
+        </button>
+
+
+        <button id="clear-button" type="button">
+          Clear Wordbank
+        </button>
+
+
+
+      </div>
+
+      <input
+        id="import-file"
+        type="file"
+        accept=".json,application/json"
+        hidden
+      >
+
+      <p id="google-login-status"
+         role="status"
+         aria-live="polite"></p>
+
+      <p id="import-status"
+         role="status"
+         aria-live="polite"></p>
+
+      <p id="export-status"
+         role="status"
+         aria-live="polite"></p>
+
+      <p id="clear-status" role="status"></p>
+    </section>
+
+    <!-- Search and appearance controls -->
+    <section class="toolbar" aria-label="Vocabulary controls">
+
+      <label class="search-label" for="search">
+        Search vocabulary
+        <input
+          id="search"
+          type="search"
+          placeholder="Search words or source pages…"
+        >
+      </label>
+
+      <label for="sort">
+        Sort by
+        <select id="sort">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="az">A to Z</option>
+          <option value="za">Z to A</option>
+        </select>
+      </label>
+
+      <label for="theme">
+        Appearance
+        <select id="theme">
+          <option value="light">Light</option>
+          <option value="dark">Dark</option>
+          <option value="system">System</option>
+        </select>
+      </label>
+
+      <label for="size">
+        Text size
+        <select id="size">
+          <option value="normal">Normal</option>
+          <option value="large">Large</option>
+        </select>
+      </label>
+
+    </section>
+
+    <!-- Vocabulary list -->
+    <p class="result-count"
+       id="result-count"
+       aria-live="polite"></p>
+
+    <ul
+      id="phrases"
+      class="phrase-list"
+      aria-label="Saved vocabulary">
+    </ul>
+
+  </main>
+
+  <!-- Load saved.js first because Google login uses displayPhrases(). -->
+  <script src="saved.js"></script>
+  <script src="google-login.js"></script>
+
+</body>
 </html>
