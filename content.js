@@ -3,7 +3,7 @@ let translationBox = null;
 let previousSelection = "";
 
 // -----------------------------------------
-// YOUR TRANSLATION & DICTIONARY LOGIC
+// TRANSLATION & DICTIONARY LOGIC
 // -----------------------------------------
 
 function detect_language_type(word){
@@ -135,10 +135,6 @@ async function saveSelection() {
 
   if (text === previousSelection) return;
   previousSelection = text;
-
-  // --- YOUR TEAMMATE'S BACKEND SYNC ---
-  // If you want to send this word to her database immediately, call this:
-  // saveToWordbank(text); 
 
   const rectangle = selection.getRangeAt(0).getBoundingClientRect();
   closeBox();
@@ -272,16 +268,15 @@ async function saveSelection() {
       }
     });
 
-    // --- YOUR TEAMMATE'S BACKEND SYNC ON BUTTON CLICK ---
-    // If she wants the word sent to the database when the user clicks "Save":
+    //save to backend database
     saveToWordbank(translatedWord);
   });
 }
 
 
-// -----------------------------------------
-// TEAMMATE'S BACKEND SYNC FUNCTION
-// -----------------------------------------
+// ------------------------
+// BACKEND SYNC FUNCTION
+// -----------------------
 async function saveToWordbank(selectedText) {
   console.log("Wordbank function called:", selectedText);
   const text = selectedText.trim();
