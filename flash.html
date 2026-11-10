@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        
+        <title>Flashcards</title>
+
+        <link rel="stylesheet" href="flashStyle.css">
+        <script src="flash.js" defer></script>
+    </head>
+    <body>
+        <h1>Your Flashcards</h1>
+        <a href="saved.html">
+            <button class="home">Home</button>
+        </a>
+
+        <!-- flashcards -->
+        <div class="card-container">
+            <div class="flashcard" id="flashcard">
+                <div class="face front" id="front">
+                    Question loading...
+                </div>
+                <div class="face back" id="back">
+                    Answer loading...
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="controls">
+            <button id="prev">Previous</button>
+            <span id="counter">0 / 0</span>
+            <button id="next">Next</button>
+        </div>
+    </body>
+</html>
