@@ -4,7 +4,7 @@ chrome.action.onClicked.addListener(() => {
 });
 
 // -----------------------------------------
-// TEAMMATE'S WORDBANK BACKEND API
+// WORDBANK BACKEND API
 // -----------------------------------------
 
 const WORDBANK_API = 'http://100.87.150.51:3000';
