@@ -19,6 +19,8 @@ const importStatus = document.getElementById("import-status");
 const exportButton = document.getElementById("export-button");
 const exportStatus = document.getElementById("export-status");
 
+const deleteStatus = document.getElementById("delete-status");
+
 let phrases = [];
 
 // -----------------------------------------
@@ -35,6 +37,7 @@ function setAppearance() {
 // -----------------------------------------
 
 function render() {
+  list.innerHTML = "";
   const query = searchInput.value.trim().toLocaleLowerCase();
 
   const filtered = phrases.filter(phrase =>
@@ -103,7 +106,17 @@ function render() {
       item.appendChild(original);
     }
 
-    // 3. Display the Definition
+    // 3. --- HERE lanugage display on each word---
+    if (phrase.language) {
+      const lang = document.createElement("div");
+      lang.style.fontSize = "12px";
+      lang.style.color = "var(--text-muted, #888)";
+      lang.style.marginTop = "2px";
+      lang.textContent = `Language: ${phrase.language}`;
+      item.appendChild(lang);
+    }
+
+    // 4. Display the Definition
     if (phrase.definition) {
       const def = document.createElement("div");
       def.style.marginTop = "8px";
@@ -112,7 +125,7 @@ function render() {
       item.appendChild(def);
     }
 
-    // 4. Metadata (URL and Date)
+    // 5. Metadata (URL and Date)
     const meta = document.createElement("div");
     meta.className = "meta";
     meta.style.marginTop = "10px";
@@ -149,6 +162,39 @@ function render() {
     meta.append(source, time);
     item.appendChild(meta);
     list.appendChild(item);
+
+  
+    // Delete specific words
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+
+    item.appendChild(deleteButton);
+    list.appendChild(item);
+
+    deleteButton.addEventListener("click", async () => {
+      const confirmed = window.confirm(
+      "Are you sure you want to delete this word from your library?"
+      );
+
+      if (!confirmed) return;
+      deleteButton.disabled = true;
+
+      try {
+        // Uses unique key of phrase you want to delete and removes it
+        await chrome.storage.local.remove(phrase.storageKey);
+        await displayPhrases();
+
+        deleteStatus.textContent = `Successfully deleted word.`;
+      }
+      catch(error) {
+        console.error("Could not delete word:", error)
+        deleteStatus.textContent = `Failed to delete word: ${error.message}`;
+      }
+      finally {
+        deleteButton.disabled = false;
+      }
+
+    })
   }
 }
 
@@ -167,7 +213,8 @@ async function displayPhrases() {
         return (typeof value?.text === "string" && value.text.trim()) || 
                (typeof value?.originalText === "string" && value.originalText.trim());
       })
-      .map(([, value]) => value);
+      // Keeps track of unique key of the phrase saved along with the phrase's text value
+      .map(([key, value]) => ({storageKey: key, ...value}));
 
     render();
 
@@ -288,14 +335,14 @@ importFile.addEventListener("change", async () => {
     const existing = new Set(
       Object.entries(stored)
         .filter(([key, value]) => key.startsWith("phrase:"))
-        .map(([, value]) => (value.originalText || value.text || "").trim().toLowerCase())
+        .map(([, value]) => (value.originalText || value.text || "").trim().replace(/\s+/g, ' ').toLowerCase())
     );
 
     const additions = {};
 
     for (const phrase of incoming) {
-      const normalized = (phrase.originalText || "").toLowerCase();
-      if (existing.has(normalized)) continue;
+      const normalized = (phrase.originalText || "").trim().toLowerCase();
+      if (!normalized || existing.has(normalized)) continue;
 
       const key = `phrase:${Date.now()}:${crypto.randomUUID()}`;
       additions[key] = phrase;
