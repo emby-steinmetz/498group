@@ -3,7 +3,7 @@ let translationBox = null;
 let previousSelection = "";
 
 // -----------------------------------------
-// TRANSLATION & DICTIONARY LOGIC
+// YOUR TRANSLATION & DICTIONARY LOGIC
 // -----------------------------------------
 
 function detect_language_type(word){
@@ -113,6 +113,17 @@ async function getDefinition(word) {
   }
 }
 
+async function isDuplicate(text){
+  const textLower = text.toLowerCase().replace(/\s+/g, ' ').trim();
+  const stored = await chrome.storage.local.get(null);
+  return Object.entries(stored)
+    .filter(([key, value]) => key.startsWith("phrase:"))
+    .some(([, value]) => {
+    const storedLower = (value.originalText || value.text || "").toLowerCase().replace(/\s+/g, ' ').trim();
+    return storedLower === textLower;
+    });
+}
+
 
 // -----------------------------------------
 // MERGED UI AND SAVING LOGIC
@@ -132,9 +143,6 @@ async function saveSelection() {
     previousSelection = "";
     return;
   }
-
-  if (text === previousSelection) return;
-  previousSelection = text;
 
   const rectangle = selection.getRangeAt(0).getBoundingClientRect();
   closeBox();
@@ -195,6 +203,7 @@ async function saveSelection() {
 
   let translatedWord = text; 
   let definitionHtml = "";
+  let originLang = await language_detector(text);
 
   try {
     translatedWord = (await translate(text)) || text;
@@ -232,10 +241,16 @@ async function saveSelection() {
       originalHtml = `<div style="font-size: 11px; color: #999; margin-top: 10px; text-align: right;">Original: ${text}</div>`;
     }
 
+    // --- HERE added lanugage display in popup--
     textDisplay.innerHTML = `
       <div style="margin-bottom: 5px;">
         <strong style="font-size: 16px;">${translatedWord}</strong>
       </div>
+
+      <div style="font-size: 12px; color: #000000; margin-bottom: 5px;">
+      Language: ${originLang}
+      </div>
+
       ${definitionHtml}
       ${originalHtml}
     `;
@@ -245,15 +260,28 @@ async function saveSelection() {
     textDisplay.textContent = "Error loading details."; 
   }
 
+  let isSaved = false;
+
   saveButton.addEventListener("click", async() =>{
+    if (isSaved) return;
+
     if (!chrome.runtime?.id) {
       saveButton.textContent = "Refresh page!";
       saveButton.style.backgroundColor = "#dc3545"; 
       return;
     }
-    saveButton.textContent = "saved!";
-    saveButton.disabled = true;
-    saveButton.style.backgroundColor = "#28a745"; 
+
+    // --- HERE implemented duplicate mitigation ---
+    try {
+      const duplicate = await isDuplicate(text);
+      
+      if (duplicate) {
+        saveButton.textContent = "Already Saved!";
+        saveButton.style.backgroundColor = "#ff8c00";
+        isSaved = true;
+        saveButton.disabled = true;
+        return;
+      }
     
     const key = `phrase:${Date.now()}:${Math.random().toString(36).slice(2)}`;
     const plaindefinition = definitionHtml ? definitionHtml.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim() : "No definition found.";
@@ -263,20 +291,39 @@ async function saveSelection() {
         originalText : text,
         translatedWord : translatedWord,
         definition : plaindefinition,
+        language: originLang,
         url: location.href,
         savedAt: new Date().toISOString()
       }
     });
+    saveButton.textContent = "saved!";
+    saveButton.style.backgroundColor = "#28a745";
+    isSaved = true;
+    saveButton.disabled = true;
+    }
+    catch (error) {
+      console.error("Cannot save phrase:", error);
+      saveButton.textContent = "Save failed!";
+      saveButton.style.backgroundColor = "#dc3545"; 
 
-    //save to backend database
-    saveToWordbank(translatedWord);
+      isSaved = false;
+      saveButton.disabled = false;
+    }
+    finally {
+      isSaved = false;
+      saveButton.disabled = false;
+    }
+
+    // --- YOUR TEAMMATE'S BACKEND SYNC ON BUTTON CLICK ---
+    // If she wants the word sent to the database when the user clicks "Save":
+    // saveToWordbank(translatedWord);
   });
 }
 
 
-// ------------------------
-// BACKEND SYNC FUNCTION
-// -----------------------
+// -----------------------------------------
+// TEAMMATE'S BACKEND SYNC FUNCTION
+// -----------------------------------------
 async function saveToWordbank(selectedText) {
   console.log("Wordbank function called:", selectedText);
   const text = selectedText.trim();
